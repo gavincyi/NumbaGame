@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Numba'),
+        title: const Text('Numba Game'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
@@ -50,24 +50,36 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'Welcome to Numba',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              'Welcome to',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w300),
+            ),
+            const Text(
+              'NUMBA',
+              style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.blue),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'A strategic numbers and prime game',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const SizedBox(height: 80),
+            
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PlayersScreen()),
+                  MaterialPageRoute(builder: (context) => const DeckSizeScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(200, 60),
                 textStyle: const TextStyle(fontSize: 20),
               ),
-              child: const Text('Start'),
+              child: const Text('Start Game'),
             ),
+            
             const SizedBox(height: 20),
+            
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -79,7 +91,7 @@ class HomeScreen extends StatelessWidget {
                 minimumSize: const Size(200, 60),
                 textStyle: const TextStyle(fontSize: 20),
               ),
-              child: const Text('Help'),
+              child: const Text('How to Play'),
             ),
           ],
         ),
@@ -88,9 +100,104 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+class DeckSizeScreen extends StatelessWidget {
+  const DeckSizeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select Deck Size'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Select Deck Size',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Choose the highest number in your deck',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            const SizedBox(height: 60),
+            
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PlayersScreen(maxCardNumber: 25),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(250, 60),
+                textStyle: const TextStyle(fontSize: 20),
+              ),
+              child: const Text('Numbers 1-25'),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PlayersScreen(maxCardNumber: 40),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(250, 60),
+                textStyle: const TextStyle(fontSize: 20),
+              ),
+              child: const Text('Numbers 1-40'),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PlayersScreen(maxCardNumber: 50),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(250, 60),
+                textStyle: const TextStyle(fontSize: 20),
+              ),
+              child: const Text('Numbers 1-50'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class PlayersScreen extends StatelessWidget {
-  const PlayersScreen({super.key});
+  final int maxCardNumber;
+  
+  const PlayersScreen({super.key, required this.maxCardNumber});
 
   @override
   Widget build(BuildContext context) {
@@ -116,42 +223,52 @@ class PlayersScreen extends StatelessWidget {
           children: [
             const Text(
               'Select Number of Players',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
+            Text(
+              'Playing with numbers 1-${maxCardNumber}',
+              style: const TextStyle(fontSize: 18, color: Colors.blue),
+            ),
+            const SizedBox(height: 15),
             const Text(
-              'Player 1 is you, others are robots',
+              'You are Player 1, others are computer players',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 60),
+            
             ElevatedButton(
               onPressed: () {
                 _startGame(context, 2);
               },
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(200, 60),
+                minimumSize: const Size(250, 60),
                 textStyle: const TextStyle(fontSize: 20),
               ),
               child: const Text('2 Players'),
             ),
+            
             const SizedBox(height: 20),
+            
             ElevatedButton(
               onPressed: () {
                 _startGame(context, 3);
               },
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(200, 60),
+                minimumSize: const Size(250, 60),
                 textStyle: const TextStyle(fontSize: 20),
               ),
               child: const Text('3 Players'),
             ),
+            
             const SizedBox(height: 20),
+            
             ElevatedButton(
               onPressed: () {
                 _startGame(context, 4);
               },
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(200, 60),
+                minimumSize: const Size(250, 60),
                 textStyle: const TextStyle(fontSize: 20),
               ),
               child: const Text('4 Players'),
@@ -168,6 +285,7 @@ class PlayersScreen extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => GameScreen(
           playerCount: players,
+          maxCardNumber: maxCardNumber,
         ),
       ),
     );

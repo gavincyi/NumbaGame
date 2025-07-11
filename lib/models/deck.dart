@@ -4,44 +4,21 @@ import 'card.dart';
 class Deck {
   final List<NumbaCard> _cards = [];
   final Random _random = Random();
+  final int maxNumber;
 
-  Deck() {
+  Deck({this.maxNumber = 50}) {
     _initializeDeck();
   }
 
   void _initializeDeck() {
     _cards.clear();
     
-    // Add number cards 1-50
-    for (int i = 1; i <= 50; i++) {
+    // Add number cards 1 to maxNumber
+    for (int i = 1; i <= maxNumber; i++) {
       _cards.add(NumbaCard(
         type: CardType.number,
         value: i,
         id: 'number_$i',
-      ));
-    }
-
-    // Add 5 Triangle function cards
-    for (int i = 1; i <= 5; i++) {
-      _cards.add(NumbaCard(
-        type: CardType.triangle,
-        id: 'triangle_$i',
-      ));
-    }
-
-    // Add 5 Square function cards
-    for (int i = 1; i <= 5; i++) {
-      _cards.add(NumbaCard(
-        type: CardType.square,
-        id: 'square_$i',
-      ));
-    }
-
-    // Add 5 Prime function cards
-    for (int i = 1; i <= 5; i++) {
-      _cards.add(NumbaCard(
-        type: CardType.prime,
-        id: 'prime_$i',
       ));
     }
 

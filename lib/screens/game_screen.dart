@@ -9,10 +9,12 @@ import '../services/audio_service.dart';
 
 class GameScreen extends StatefulWidget {
   final int playerCount;
+  final int maxCardNumber;
 
   const GameScreen({
     super.key,
     required this.playerCount,
+    required this.maxCardNumber,
   });
 
   @override
@@ -35,7 +37,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _initializeGame() {
-    final deck = Deck();
+    final deck = Deck(maxNumber: widget.maxCardNumber);
     final players = <Player>[];
     
     // First player is human, others are robots
@@ -96,17 +98,8 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  void _onDrawCard() {
-    if (gameState.phase != GamePhase.playing) return;
-    if (!gameState.currentPlayer.isHuman) return; // Only human can draw cards
-    
-    setState(() {
-      final success = gameState.drawCard();
-      if (success) {
-        AudioService().playDrawSound();
-      }
-    });
-  }
+  // Draw card is now automatic after placing a card
+  // No separate draw action needed
 
   void _showWinnerDialog() {
     showDialog(
@@ -114,7 +107,29 @@ class _GameScreenState extends State<GameScreen> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Game Over!'),
-        content: Text('${gameState.winner?.name} wins!'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${gameState.winner?.name} wins with ${gameState.winner?.score} points!',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            const Text('Final Scores:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            for (final player in gameState.players)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(player.name),
+                    Text('${player.score} points'),
+                  ],
+                ),
+              ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -141,7 +156,7 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Numba'),
+        title: Text('Numba (1-${widget.maxCardNumber})'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
@@ -176,88 +191,119 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Cards in deck: ${gameState.deck.remainingCards}',
+                        'Cards in deck: ${gameState.deck.remainingCards}/${widget.maxCardNumber}',
                         style: const TextStyle(fontSize: 14),
                       ),
-                    ],
-                  ),
-                ),
-                
-                // Robot players' card counts (skip human player)
-                Expanded(
-                  flex: 1,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: gameState.players.length - 1, // Exclude human player
-                    itemBuilder: (context, index) {
-                      final player = gameState.players[index + 1]; // Skip human player (index 0)
-                      
-                      return Container(
-                        margin: const EdgeInsets.all(8),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: player == gameState.currentPlayer 
-                                ? Colors.blue 
-                                : Colors.grey,
-                            width: player == gameState.currentPlayer ? 2 : 1,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                          color: player == gameState.currentPlayer 
-                              ? Colors.blue.shade50 
-                              : null,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      const SizedBox(height: 8),
+                      // Current Scores
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: gameState.players.map((player) => Column(
                           children: [
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
-                                  Icons.android,
+                                Icon(
+                                  player.isHuman ? Icons.person : Icons.android,
                                   size: 16,
-                                  color: Colors.green,
+                                  color: player.isHuman ? Colors.blue : Colors.green,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   player.name,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    fontWeight: player == gameState.currentPlayer 
+                                        ? FontWeight.bold 
+                                        : FontWeight.normal,
+                                    color: player == gameState.currentPlayer 
+                                        ? Colors.blue 
+                                        : null,
+                                  ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 4),
-                            Text('${player.cardCount} cards'),
-                            if (player == gameState.currentPlayer)
-                              const Text(
-                                'Playing...',
-                                style: TextStyle(fontSize: 12, color: Colors.blue),
-                              ),
+                            Text(
+                              'Score: ${player.score}',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
                           ],
+                        )).toList(),
+                      ),
+                      if (gameState.lastAction != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          gameState.lastAction!,
+                          style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                          textAlign: TextAlign.center,
                         ),
-                      );
-                    },
+                      ],
+                    ],
                   ),
                 ),
                 
-                // Played cards area
+                // Player hand counts (simplified since scores are shown above)
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: gameState.players.map((player) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: player == gameState.currentPlayer 
+                              ? Colors.blue 
+                              : Colors.grey,
+                          width: player == gameState.currentPlayer ? 2 : 1,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        color: player == gameState.currentPlayer 
+                            ? Colors.blue.shade50 
+                            : null,
+                      ),
+                      child: Text(
+                        '${player.name}: ${player.cardCount} cards',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: player == gameState.currentPlayer 
+                              ? FontWeight.bold 
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    )).toList(),
+                  ),
+                ),
+                
+                // Table cards area
                 Container(
                   height: 120,
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      const Text(
-                        'Played Cards',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Table Cards',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          if (gameState.tableCards.isNotEmpty) ...[
+                            const SizedBox(width: 16),
+                            Text(
+                              'Sum: ${gameState.tableCards.fold(0, (sum, card) => sum + (card.value ?? 0))}',
+                              style: const TextStyle(fontSize: 14, color: Colors.blue),
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Expanded(
-                        child: gameState.playedCards.isEmpty
-                            ? const Center(child: Text('No cards played yet'))
+                        child: gameState.tableCards.isEmpty
+                            ? const Center(child: Text('No cards on table'))
                             : ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                itemCount: gameState.playedCards.length,
+                                itemCount: gameState.tableCards.length,
                                 itemBuilder: (context, index) {
-                                  final card = gameState.playedCards[index];
+                                  final card = gameState.tableCards[index];
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 2),
                                     child: CardWidget(
@@ -279,12 +325,32 @@ class _GameScreenState extends State<GameScreen> {
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        Text(
-                          'Your Hand',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Your Hand',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Your Score: ${gameState.players[0].score}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         Expanded(
@@ -299,25 +365,22 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ),
                 
-                // Action buttons (only show for human player)
+                // Action instructions (only show for human player)
                 if (gameState.currentPlayer.isHuman)
                   Container(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
                         const Text(
-                          'Your Turn: Tap a card to play or draw a new card',
+                          'Your Turn: Tap a card to place it on the table',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: gameState.deck.isEmpty ? null : _onDrawCard,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Draw Card'),
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(160, 50),
-                          ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'If the sum becomes prime, you collect all table cards!',
+                          style: TextStyle(fontSize: 14, color: Colors.green),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
