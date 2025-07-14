@@ -1,4 +1,3 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 
 class AudioService {
@@ -6,60 +5,33 @@ class AudioService {
   factory AudioService() => _instance;
   AudioService._internal();
 
-  final AudioPlayer _backgroundPlayer = AudioPlayer();
-  final AudioPlayer _sfxPlayer = AudioPlayer();
-
   bool _isMusicEnabled = true;
   bool _isSfxEnabled = true;
-  bool _audioInitialized = false;
 
   bool get isMusicEnabled => _isMusicEnabled;
   bool get isSfxEnabled => _isSfxEnabled;
 
   Future<void> initialize() async {
-    try {
-      await _backgroundPlayer.setReleaseMode(ReleaseMode.loop);
-      await _sfxPlayer.setReleaseMode(ReleaseMode.stop);
-      _audioInitialized = true;
-    } catch (e) {
-      print('Audio initialization failed: $e');
-      _audioInitialized = false;
-    }
+    // Using system sounds only - no external plugin needed
+    print('Audio service initialized with system sounds');
   }
 
   Future<void> playBackgroundMusic() async {
-    if (!_isMusicEnabled || !_audioInitialized) return;
-    
-    // For now, we'll skip background music to avoid errors
-    // In a real app, you would add actual music files to assets/audio/
+    if (!_isMusicEnabled) return;
+    // Background music disabled for now
     print('Background music would play here');
   }
 
   Future<void> stopBackgroundMusic() async {
-    if (!_audioInitialized) return;
-    try {
-      await _backgroundPlayer.stop();
-    } catch (e) {
-      print('Failed to stop background music: $e');
-    }
+    // No-op for system sounds
   }
 
   Future<void> pauseBackgroundMusic() async {
-    if (!_audioInitialized) return;
-    try {
-      await _backgroundPlayer.pause();
-    } catch (e) {
-      print('Failed to pause background music: $e');
-    }
+    // No-op for system sounds
   }
 
   Future<void> resumeBackgroundMusic() async {
-    if (!_isMusicEnabled || !_audioInitialized) return;
-    try {
-      await _backgroundPlayer.resume();
-    } catch (e) {
-      print('Failed to resume background music: $e');
-    }
+    // No-op for system sounds
   }
 
   Future<void> playCardSound() async {
@@ -108,25 +80,14 @@ class AudioService {
   }
 
   void setMusicVolume(double volume) {
-    if (_audioInitialized) {
-      _backgroundPlayer.setVolume(volume);
-    }
+    // System sounds volume is controlled by device
   }
 
   void setSfxVolume(double volume) {
-    if (_audioInitialized) {
-      _sfxPlayer.setVolume(volume);
-    }
+    // System sounds volume is controlled by device
   }
 
   Future<void> dispose() async {
-    if (_audioInitialized) {
-      try {
-        await _backgroundPlayer.dispose();
-        await _sfxPlayer.dispose();
-      } catch (e) {
-        print('Failed to dispose audio players: $e');
-      }
-    }
+    // No resources to dispose for system sounds
   }
 }
