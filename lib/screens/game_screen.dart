@@ -3,18 +3,23 @@ import '../models/card.dart';
 import '../models/deck.dart';
 import '../models/player.dart';
 import '../models/game_state.dart';
+import '../models/robot_intelligence.dart';
 import '../widgets/card_widget.dart';
 import '../widgets/player_hand.dart';
+import '../widgets/play_history_dialog.dart';
 import '../services/audio_service.dart';
+import '../utils/prime_checker.dart';
 
 class GameScreen extends StatefulWidget {
   final int playerCount;
   final int maxCardNumber;
+  final RobotIntelligenceLevel robotIntelligence;
 
   const GameScreen({
     super.key,
     required this.playerCount,
     required this.maxCardNumber,
+    required this.robotIntelligence,
   });
 
   @override
@@ -104,6 +109,7 @@ class _GameScreenState extends State<GameScreen> {
         id: 'player_$i',
         name: i == 0 ? 'You' : shuffledNames[i - 1], // Use shuffled names for robots
         type: i == 0 ? PlayerType.human : PlayerType.robot,
+        intelligence: i == 0 ? null : RobotIntelligence(widget.robotIntelligence),
       ));
     }
 
@@ -152,8 +158,21 @@ class _GameScreenState extends State<GameScreen> {
       if (success) {
         AudioService().playCardSound();
         // Winner dialog will be shown by state change callback
+      } else if (gameState.requiresNonPrimeCard) {
+        // Show feedback that only non-prime cards are allowed
+        _showNonPrimeCardMessage();
       }
     });
+  }
+  
+  void _showNonPrimeCardMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('You must play a non-prime card! (Numbers like 1, 4, 6, 8, 9, 10, etc.)'),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   // Draw card is now automatic after placing a card
@@ -270,6 +289,17 @@ class _GameScreenState extends State<GameScreen> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.history, color: Colors.white),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => PlayHistoryDialog(
+                  playHistory: gameState.playHistory,
+                ),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: () {
               setState(() {
@@ -368,15 +398,29 @@ class _GameScreenState extends State<GameScreen> {
                                         color: player.isHuman ? const Color(0xFF00d4ff) : const Color(0xFF4CAF50),
                                       ),
                                       const SizedBox(width: 6),
-                                      Text(
-                                        player.name,
-                                        style: TextStyle(
-                                          fontWeight: player == gameState.currentPlayer 
-                                              ? FontWeight.bold 
-                                              : FontWeight.w500,
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                        ),
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            player.name,
+                                            style: TextStyle(
+                                              fontWeight: player == gameState.currentPlayer 
+                                                  ? FontWeight.bold 
+                                                  : FontWeight.w500,
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          if (player.isRobot && player.intelligence != null)
+                                            Text(
+                                              '(${player.intelligence!.levelName})',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white.withOpacity(0.7),
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -587,6 +631,7 @@ class _GameScreenState extends State<GameScreen> {
                                 cards: gameState.players[0].hand,
                                 onCardTap: gameState.currentPlayer.isHuman ? _onCardTap : null,
                                 isCurrentPlayer: gameState.currentPlayer.isHuman,
+                                highlightNonPrime: gameState.requiresNonPrimeCard && gameState.currentPlayer.isHuman,
                               ),
                             ),
                           ],

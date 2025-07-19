@@ -1,4 +1,5 @@
 import 'card.dart';
+import 'robot_intelligence.dart';
 
 enum PlayerType { human, robot }
 
@@ -8,12 +9,14 @@ class Player {
   final PlayerType type;
   final List<NumbaCard> hand;
   final List<NumbaCard> collectedCards; // Cards collected from table
+  final RobotIntelligence? intelligence; // Only for robot players
 
   Player({
     required this.id,
     required this.name,
     required this.type,
     List<NumbaCard>? initialHand,
+    this.intelligence,
   }) : hand = initialHand ?? [],
        collectedCards = [];
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/game_screen.dart';
 import 'services/audio_service.dart';
+import 'models/robot_intelligence.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ class CardGameApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Numba',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -611,7 +613,7 @@ class PlayersScreen extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () => _startGame(context, playerCount),
+          onTap: () => _selectIntelligence(context, playerCount),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Row(
@@ -675,13 +677,254 @@ class PlayersScreen extends StatelessWidget {
     );
   }
 
-  void _startGame(BuildContext context, int players) {
+  void _selectIntelligence(BuildContext context, int players) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => IntelligenceScreen(
+          playerCount: players,
+          maxCardNumber: maxCardNumber,
+        ),
+      ),
+    );
+  }
+}
+
+class IntelligenceScreen extends StatelessWidget {
+  final int playerCount;
+  final int maxCardNumber;
+  
+  const IntelligenceScreen({
+    super.key,
+    required this.playerCount,
+    required this.maxCardNumber,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Select Robot Intelligence',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF667eea),
+              Color(0xFF764ba2),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  SizedBox(height: screenSize.height * 0.05),
+                  
+                  // Header Section
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.psychology,
+                          size: isSmallScreen ? 48 : 64,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Robot Intelligence',
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 28 : 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '$playerCount Players • Numbers 1-$maxCardNumber',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14 : 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: screenSize.height * 0.03),
+                  
+                  // Intelligence Options
+                  Container(
+                    width: isSmallScreen ? double.infinity : 500,
+                    child: Column(
+                      children: [
+                        _buildIntelligenceOption(
+                          context: context,
+                          level: RobotIntelligenceLevel.toddler,
+                          title: 'Toddler',
+                          subtitle: 'Random Play',
+                          icon: Icons.child_care,
+                          color: const Color(0xFF4CAF50),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildIntelligenceOption(
+                          context: context,
+                          level: RobotIntelligenceLevel.adult,
+                          title: 'Adult',
+                          subtitle: 'Best Card Search',
+                          icon: Icons.person,
+                          color: const Color(0xFFFF9800),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildIntelligenceOption(
+                          context: context,
+                          level: RobotIntelligenceLevel.guru,
+                          title: 'Guru',
+                          subtitle: 'Optimal Strategy',
+                          icon: Icons.auto_awesome,
+                          color: const Color(0xFFF44336),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: screenSize.height * 0.05),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIntelligenceOption({
+    required BuildContext context,
+    required RobotIntelligenceLevel level,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => _startGame(context, level),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white.withOpacity(0.6),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _startGame(BuildContext context, RobotIntelligenceLevel intelligence) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => GameScreen(
-          playerCount: players,
+          playerCount: playerCount,
           maxCardNumber: maxCardNumber,
+          robotIntelligence: intelligence,
         ),
       ),
     );

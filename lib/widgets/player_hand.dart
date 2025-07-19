@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import '../models/card.dart';
+import '../utils/prime_checker.dart';
 import 'card_widget.dart';
 
 class PlayerHand extends StatelessWidget {
   final List<NumbaCard> cards;
   final Function(NumbaCard)? onCardTap;
   final bool isCurrentPlayer;
+  final bool highlightNonPrime;
 
   const PlayerHand({
     super.key,
     required this.cards,
     this.onCardTap,
     this.isCurrentPlayer = false,
+    this.highlightNonPrime = false,
   });
 
   @override
@@ -35,12 +38,29 @@ class PlayerHand extends StatelessWidget {
       itemCount: cards.length,
       itemBuilder: (context, index) {
         final card = cards[index];
-        return CardWidget(
-          card: card,
-          size: CardSize.medium,
-          onTap: isCurrentPlayer && onCardTap != null
-              ? () => onCardTap!(card)
+        final isNonPrime = card.value != null && !PrimeChecker.isPrime(card.value!);
+        final shouldHighlight = highlightNonPrime && isNonPrime;
+        
+        return Container(
+          decoration: shouldHighlight
+              ? BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.6),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                )
               : null,
+          child: CardWidget(
+            card: card,
+            size: CardSize.medium,
+            onTap: isCurrentPlayer && onCardTap != null
+                ? () => onCardTap!(card)
+                : null,
+          ),
         );
       },
     );
