@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/game_screen.dart';
+import 'screens/tutorial_screen.dart';
 import 'services/audio_service.dart';
 import 'models/robot_intelligence.dart';
 
@@ -97,7 +98,7 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(height: screenSize.height * 0.08),
                 
                 // Action Buttons
-                Container(
+                SizedBox(
                   width: isSmallScreen ? screenSize.width * 0.8 : 320,
                   child: Column(
                     children: [
@@ -112,6 +113,24 @@ class HomeScreen extends StatelessWidget {
                           );
                         },
                         isPrimary: true,
+                      ),
+                      const SizedBox(height: 20),
+                      _buildActionButton(
+                        context: context,
+                        text: 'Tutorial',
+                        icon: Icons.school,
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const TutorialScreen()),
+                          );
+                          
+                          // If tutorial was completed, offer to start a game
+                          if (result == 'completed' && context.mounted) {
+                            _showStartGameDialog(context);
+                          }
+                        },
+                        isPrimary: false,
                       ),
                       const SizedBox(height: 20),
                       _buildActionButton(
@@ -207,10 +226,77 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _showStartGameDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1a1a2e),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFF00d4ff), width: 2),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.celebration, color: Color(0xFF00d4ff), size: 28),
+            SizedBox(width: 12),
+            Text(
+              'Tutorial Complete!',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Great job! You\'re now ready to play Numba. Would you like to start your first game?',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Maybe Later',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DeckSizeScreen(showTutorialHints: true)),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00d4ff),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Start Game!',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class DeckSizeScreen extends StatelessWidget {
-  const DeckSizeScreen({super.key});
+  final bool showTutorialHints;
+  
+  const DeckSizeScreen({super.key, this.showTutorialHints = false});
 
   @override
   Widget build(BuildContext context) {
@@ -295,7 +381,7 @@ class DeckSizeScreen extends StatelessWidget {
                   SizedBox(height: screenSize.height * 0.03),
                   
                   // Deck Options
-                  Container(
+                  SizedBox(
                     width: isSmallScreen ? double.infinity : 500,
                     child: Column(
                       children: [
@@ -375,7 +461,10 @@ class DeckSizeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PlayersScreen(maxCardNumber: maxCardNumber),
+                builder: (context) => PlayersScreen(
+                  maxCardNumber: maxCardNumber, 
+                  showTutorialHints: showTutorialHints,
+                ),
               ),
             );
           },
@@ -445,8 +534,9 @@ class DeckSizeScreen extends StatelessWidget {
 
 class PlayersScreen extends StatelessWidget {
   final int maxCardNumber;
+  final bool showTutorialHints;
   
-  const PlayersScreen({super.key, required this.maxCardNumber});
+  const PlayersScreen({super.key, required this.maxCardNumber, this.showTutorialHints = false});
 
   @override
   Widget build(BuildContext context) {
@@ -537,7 +627,7 @@ class PlayersScreen extends StatelessWidget {
                   SizedBox(height: screenSize.height * 0.03),
                   
                   // Player Options
-                  Container(
+                  SizedBox(
                     width: isSmallScreen ? double.infinity : 500,
                     child: Column(
                       children: [
@@ -684,6 +774,7 @@ class PlayersScreen extends StatelessWidget {
         builder: (context) => IntelligenceScreen(
           playerCount: players,
           maxCardNumber: maxCardNumber,
+          showTutorialHints: showTutorialHints,
         ),
       ),
     );
@@ -693,11 +784,13 @@ class PlayersScreen extends StatelessWidget {
 class IntelligenceScreen extends StatelessWidget {
   final int playerCount;
   final int maxCardNumber;
+  final bool showTutorialHints;
   
   const IntelligenceScreen({
     super.key,
     required this.playerCount,
     required this.maxCardNumber,
+    this.showTutorialHints = false,
   });
 
   @override
@@ -789,7 +882,7 @@ class IntelligenceScreen extends StatelessWidget {
                   SizedBox(height: screenSize.height * 0.03),
                   
                   // Intelligence Options
-                  Container(
+                  SizedBox(
                     width: isSmallScreen ? double.infinity : 500,
                     child: Column(
                       children: [
@@ -925,6 +1018,7 @@ class IntelligenceScreen extends StatelessWidget {
           playerCount: playerCount,
           maxCardNumber: maxCardNumber,
           robotIntelligence: intelligence,
+          showTutorialHints: showTutorialHints,
         ),
       ),
     );
@@ -1017,7 +1111,7 @@ class HelpScreen extends StatelessWidget {
                   SizedBox(height: screenSize.height * 0.03),
                   
                   // Help Content
-                  Container(
+                  SizedBox(
                     width: isSmallScreen ? double.infinity : 600,
                     child: Column(
                       children: [
@@ -1222,7 +1316,7 @@ class SettingsScreen extends StatelessWidget {
                   SizedBox(height: screenSize.height * 0.03),
                   
                   // Settings Content
-                  Container(
+                  SizedBox(
                     width: isSmallScreen ? double.infinity : 600,
                     child: Column(
                       children: [

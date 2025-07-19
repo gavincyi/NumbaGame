@@ -7,6 +7,7 @@ import '../models/robot_intelligence.dart';
 import '../widgets/card_widget.dart';
 import '../widgets/player_hand.dart';
 import '../widgets/play_history_dialog.dart';
+import '../widgets/game_tutorial_helper.dart';
 import '../services/audio_service.dart';
 import '../utils/prime_checker.dart';
 
@@ -14,12 +15,14 @@ class GameScreen extends StatefulWidget {
   final int playerCount;
   final int maxCardNumber;
   final RobotIntelligenceLevel robotIntelligence;
+  final bool showTutorialHints;
 
   const GameScreen({
     super.key,
     required this.playerCount,
     required this.maxCardNumber,
     required this.robotIntelligence,
+    this.showTutorialHints = false,
   });
 
   @override
@@ -28,6 +31,7 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   late GameState gameState;
+  bool _showTutorialHelper = false;
   
   // List of human names for robot players
   static const List<String> _robotNames = [
@@ -86,6 +90,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
+    _showTutorialHelper = widget.showTutorialHints;
     _initializeGame();
   }
 
@@ -328,7 +333,9 @@ class _GameScreenState extends State<GameScreen> {
                   color: Colors.white,
                 ),
               )
-            : SafeArea(
+            : Stack(
+                children: [
+                  SafeArea(
                 child: Column(
                   children: [
                     // Game status
@@ -371,9 +378,12 @@ class _GameScreenState extends State<GameScreen> {
                           ),
                           const SizedBox(height: 16),
                           // Current Scores
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: gameState.players.map((player) => Container(
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                                                          child: Row(
+                                children: gameState.players.map((player) => Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              width: 120, // Fixed width for consistent sizing
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
                                 color: player == gameState.currentPlayer 
@@ -388,9 +398,10 @@ class _GameScreenState extends State<GameScreen> {
                                 ),
                               ),
                               child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(
                                         player.isHuman ? Icons.person : Icons.android,
@@ -410,6 +421,7 @@ class _GameScreenState extends State<GameScreen> {
                                               color: Colors.white,
                                               fontSize: 14,
                                             ),
+                                            textAlign: TextAlign.center,
                                           ),
                                           if (player.isRobot && player.intelligence != null)
                                             Text(
@@ -419,6 +431,7 @@ class _GameScreenState extends State<GameScreen> {
                                                 color: Colors.white.withOpacity(0.7),
                                                 fontStyle: FontStyle.italic,
                                               ),
+                                              textAlign: TextAlign.center,
                                             ),
                                         ],
                                       ),
@@ -428,14 +441,16 @@ class _GameScreenState extends State<GameScreen> {
                                   Text(
                                     'Score: ${player.score}',
                                     style: const TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),
                             )).toList(),
+                            ),
                           ),
                           if (gameState.lastAction != null) ...[
                             const SizedBox(height: 12),
@@ -577,7 +592,7 @@ class _GameScreenState extends State<GameScreen> {
                                   child: Text(
                                     'Score: ${gameState.players[0].score}',
                                     style: const TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
@@ -642,6 +657,19 @@ class _GameScreenState extends State<GameScreen> {
                     
                   ],
                 ),
+                  ),
+                  
+                  // Tutorial helper overlay
+                  if (_showTutorialHelper)
+                    GameTutorialHelper(
+                      gameState: gameState,
+                      onDismiss: () {
+                        setState(() {
+                          _showTutorialHelper = false;
+                        });
+                      },
+                    ),
+                ],
               ),
       ),
     );
