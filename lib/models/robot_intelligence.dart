@@ -3,7 +3,7 @@ import 'card.dart';
 import 'player.dart';
 import '../utils/prime_checker.dart';
 
-enum RobotIntelligenceLevel { toddler, adult, guru }
+enum RobotIntelligenceLevel { easy, medium, hard }
 
 class RobotIntelligence {
   final RobotIntelligenceLevel level;
@@ -13,22 +13,22 @@ class RobotIntelligence {
   
   String get levelName {
     switch (level) {
-      case RobotIntelligenceLevel.toddler:
-        return 'Toddler';
-      case RobotIntelligenceLevel.adult:
-        return 'Adult';
-      case RobotIntelligenceLevel.guru:
-        return 'Guru';
+      case RobotIntelligenceLevel.easy:
+        return 'Easy';
+      case RobotIntelligenceLevel.medium:
+        return 'Medium';
+      case RobotIntelligenceLevel.hard:
+        return 'Hard';
     }
   }
   
   String get levelDescription {
     switch (level) {
-      case RobotIntelligenceLevel.toddler:
+      case RobotIntelligenceLevel.easy:
         return 'Plays random cards';
-      case RobotIntelligenceLevel.adult:
+      case RobotIntelligenceLevel.medium:
         return 'Searches for best moves';
-      case RobotIntelligenceLevel.guru:
+      case RobotIntelligenceLevel.hard:
         return 'Uses optimal strategy';
     }
   }
@@ -37,20 +37,20 @@ class RobotIntelligence {
     if (player.hand.isEmpty) return null;
     
     switch (level) {
-      case RobotIntelligenceLevel.toddler:
-        return _toddlerStrategy(player);
-      case RobotIntelligenceLevel.adult:
-        return _adultStrategy(player, tableCards);
-      case RobotIntelligenceLevel.guru:
-        return _guruStrategy(player, tableCards, playedCards);
+      case RobotIntelligenceLevel.easy:
+        return _easyStrategy(player);
+      case RobotIntelligenceLevel.medium:
+        return _mediumStrategy(player, tableCards);
+      case RobotIntelligenceLevel.hard:
+        return _hardStrategy(player, tableCards, playedCards);
     }
   }
   
-  NumbaCard _toddlerStrategy(Player player) {
+  NumbaCard _easyStrategy(Player player) {
     return player.hand[_random.nextInt(player.hand.length)];
   }
   
-  NumbaCard _adultStrategy(Player player, List<NumbaCard> tableCards) {
+  NumbaCard _mediumStrategy(Player player, List<NumbaCard> tableCards) {
     final currentSum = tableCards.fold(0, (sum, card) => sum + (card.value ?? 0));
     
     NumbaCard? bestCard;
@@ -77,7 +77,7 @@ class RobotIntelligence {
     return bestCard ?? player.hand[0];
   }
   
-  NumbaCard _guruStrategy(Player player, List<NumbaCard> tableCards, List<NumbaCard> playedCards) {
+  NumbaCard _hardStrategy(Player player, List<NumbaCard> tableCards, List<NumbaCard> playedCards) {
     final currentSum = tableCards.fold(0, (sum, card) => sum + (card.value ?? 0));
     
     NumbaCard? bestCard;

@@ -338,144 +338,7 @@ class _GameScreenState extends State<GameScreen> {
                   SafeArea(
                 child: Column(
                   children: [
-                    // Game status
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.all(16),
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Current Turn: ${gameState.currentPlayer.name}',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Cards in deck: ${gameState.deck.remainingCards}/${widget.maxCardNumber}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white.withOpacity(0.8),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // Current Scores
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                                                          child: Row(
-                                children: gameState.players.map((player) => Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              width: 120, // Fixed width for consistent sizing
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: player == gameState.currentPlayer 
-                                    ? const Color(0xFF00d4ff).withOpacity(0.2)
-                                    : Colors.white.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: player == gameState.currentPlayer 
-                                      ? const Color(0xFF00d4ff)
-                                      : Colors.white.withOpacity(0.3),
-                                  width: player == gameState.currentPlayer ? 2 : 1,
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        player.isHuman ? Icons.person : Icons.android,
-                                        size: 18,
-                                        color: player.isHuman ? const Color(0xFF00d4ff) : const Color(0xFF4CAF50),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            player.name,
-                                            style: TextStyle(
-                                              fontWeight: player == gameState.currentPlayer 
-                                                  ? FontWeight.bold 
-                                                  : FontWeight.w500,
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          if (player.isRobot && player.intelligence != null)
-                                            Text(
-                                              '(${player.intelligence!.levelName})',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.white.withOpacity(0.7),
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Score: ${player.score}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            )).toList(),
-                            ),
-                          ),
-                          if (gameState.lastAction != null) ...[
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF00d4ff).withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                gameState.lastAction!,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    
-                    // Table cards area
+                    // Table cards area (moved to top)
                     Container(
                       height: 140,
                       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -552,6 +415,7 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                     ),
                     
+                    
                     // Human player's hand (always show)
                     Expanded(
                       flex: 2,
@@ -618,7 +482,7 @@ class _GameScreenState extends State<GameScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.android, color: Color(0xFF4CAF50), size: 20),
+                                    const Icon(Icons.smart_toy, color: Color(0xFF4CAF50), size: 20),
                                     const SizedBox(width: 8),
                                     Text(
                                       '${gameState.currentPlayer.name} is thinking...',
@@ -654,6 +518,142 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                     ),
                     
+                    // Game status (moved to bottom)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Current Turn: ${gameState.currentPlayer.name}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Cards in deck: ${gameState.deck.remainingCards}/${widget.maxCardNumber}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Current Scores
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                                                          child: Row(
+                                children: gameState.players.map((player) => Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              width: 120, // Fixed width for consistent sizing
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: player == gameState.currentPlayer 
+                                    ? const Color(0xFF00d4ff).withOpacity(0.2)
+                                    : Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: player == gameState.currentPlayer 
+                                      ? const Color(0xFF00d4ff)
+                                      : Colors.white.withOpacity(0.3),
+                                  width: player == gameState.currentPlayer ? 2 : 1,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        player.isHuman ? Icons.person : Icons.smart_toy,
+                                        size: 18,
+                                        color: player.isHuman ? const Color(0xFF00d4ff) : const Color(0xFF4CAF50),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            player.name,
+                                            style: TextStyle(
+                                              fontWeight: player == gameState.currentPlayer 
+                                                  ? FontWeight.bold 
+                                                  : FontWeight.w500,
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          if (player.isRobot && player.intelligence != null)
+                                            Text(
+                                              '(${player.intelligence!.levelName})',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white.withOpacity(0.7),
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Score: ${player.score}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            )).toList(),
+                            ),
+                          ),
+                          if (gameState.lastAction != null) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF00d4ff).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                gameState.lastAction!,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                     
                   ],
                 ),

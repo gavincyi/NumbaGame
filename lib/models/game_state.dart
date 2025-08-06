@@ -214,13 +214,13 @@ class GameState {
       int thinkingTime = 1500; // default fallback
       if (currentPlayer.intelligence != null) {
         switch (currentPlayer.intelligence!.level) {
-          case RobotIntelligenceLevel.toddler:
+          case RobotIntelligenceLevel.easy:
             thinkingTime = 100;
             break;
-          case RobotIntelligenceLevel.adult:
+          case RobotIntelligenceLevel.medium:
             thinkingTime = 200;
             break;
-          case RobotIntelligenceLevel.guru:
+          case RobotIntelligenceLevel.hard:
             thinkingTime = 800;
             break;
         }
